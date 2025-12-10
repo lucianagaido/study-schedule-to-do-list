@@ -46,7 +46,13 @@ export default function Home() {
     checkAuth()
 
     // Listen for auth changes
-    const supabase = getSupabaseClient()
+    let supabase
+    try {
+      supabase = getSupabaseClient()
+    } catch {
+      return () => {}
+    }
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
