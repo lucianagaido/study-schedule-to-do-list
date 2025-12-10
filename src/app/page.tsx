@@ -19,7 +19,14 @@ export default function Home() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const supabase = getSupabaseClient()
+        let supabase
+        try {
+          supabase = getSupabaseClient()
+        } catch (clientErr: any) {
+          setError('Supabase is not configured. Please check your environment variables.')
+          setLoading(false)
+          return
+        }
         const {
           data: { session },
         } = await supabase.auth.getSession()

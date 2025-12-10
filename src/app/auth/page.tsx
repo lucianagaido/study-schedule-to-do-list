@@ -47,8 +47,16 @@ export default function AuthPage() {
     setError(null)
 
     try {
-        if (mode === 'signup') {
-        const supabase = getSupabaseClient()
+      let supabase
+      try {
+        supabase = getSupabaseClient()
+      } catch (clientErr: any) {
+        setError('Supabase is not configured. Please contact support.')
+        setLoading(false)
+        return
+      }
+
+      if (mode === 'signup') {
         const { error: signupError } = await supabase.auth.signUp({
           email,
           password,
@@ -57,7 +65,6 @@ export default function AuthPage() {
         setError(null)
         alert('Check your email for verification link!')
       } else {
-        const supabase = getSupabaseClient()
         const { error: loginError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -70,9 +77,7 @@ export default function AuthPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  return (
+  }  return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-lg shadow-lg p-8">
