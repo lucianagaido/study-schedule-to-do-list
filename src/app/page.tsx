@@ -66,12 +66,12 @@ export default function Home() {
     }
   }
 
-  const handleCreateTodo = async (input: CreateTodoInput) => {
+  const handleCreateTodo = async (input: CreateTodoInput | UpdateTodoInput) => {
     if (!user) return
 
     try {
       setFormLoading(true)
-      const newTodo = await todoAPI.createTodo(user.id, input)
+      const newTodo = await todoAPI.createTodo(user.id, input as CreateTodoInput)
       setTodos([newTodo, ...todos])
       setShowForm(false)
       setError(null)
@@ -83,12 +83,12 @@ export default function Home() {
     }
   }
 
-  const handleUpdateTodo = async (input: UpdateTodoInput) => {
+  const handleUpdateTodo = async (input: CreateTodoInput | UpdateTodoInput) => {
     if (!editingTodo) return
 
     try {
       setFormLoading(true)
-      const updated = await todoAPI.updateTodo(editingTodo.id, input)
+      const updated = await todoAPI.updateTodo(editingTodo.id, input as UpdateTodoInput)
       setTodos(todos.map((t) => (t.id === updated.id ? updated : t)))
       setEditingTodo(null)
       setShowForm(false)
