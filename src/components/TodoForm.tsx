@@ -5,7 +5,7 @@ import { Todo, CreateTodoInput, UpdateTodoInput } from '@/types'
 
 interface TodoFormProps {
   initialTodo?: Todo
-  onSubmit: (data: CreateTodoInput | UpdateTodoInput) => void
+  onSubmit: (data: CreateTodoInput | UpdateTodoInput) => Promise<void> | void
   onCancel: () => void
   isLoading?: boolean
 }
@@ -22,13 +22,13 @@ export const TodoForm: React.FC<TodoFormProps> = ({
     due_date: initialTodo?.due_date || '',
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.title.trim()) {
       alert('Title is required')
       return
     }
-    onSubmit({
+    await onSubmit({
       title: formData.title,
       description: formData.description || undefined,
       due_date: formData.due_date || undefined,
