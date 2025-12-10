@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 
 export default function AuthPage() {
   const [email, setEmail] = useState('')
@@ -13,6 +13,7 @@ export default function AuthPage() {
 
   useEffect(() => {
     const checkUser = async () => {
+      const supabase = getSupabaseClient()
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -46,7 +47,8 @@ export default function AuthPage() {
     setError(null)
 
     try {
-      if (mode === 'signup') {
+        if (mode === 'signup') {
+        const supabase = getSupabaseClient()
         const { error: signupError } = await supabase.auth.signUp({
           email,
           password,
@@ -55,6 +57,7 @@ export default function AuthPage() {
         setError(null)
         alert('Check your email for verification link!')
       } else {
+        const supabase = getSupabaseClient()
         const { error: loginError } = await supabase.auth.signInWithPassword({
           email,
           password,

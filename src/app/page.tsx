@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 import { todoAPI } from '@/lib/todoAPI'
 import { Todo, CreateTodoInput, UpdateTodoInput } from '@/types'
 import { TodoItem } from '@/components/TodoItem'
@@ -19,6 +19,7 @@ export default function Home() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const supabase = getSupabaseClient()
         const {
           data: { session },
         } = await supabase.auth.getSession()
@@ -38,6 +39,7 @@ export default function Home() {
     checkAuth()
 
     // Listen for auth changes
+    const supabase = getSupabaseClient()
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -127,6 +129,7 @@ export default function Home() {
 
   const handleSignOut = async () => {
     try {
+      const supabase = getSupabaseClient()
       await supabase.auth.signOut()
       setUser(null)
       setTodos([])

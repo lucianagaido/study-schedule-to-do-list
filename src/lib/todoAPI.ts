@@ -1,8 +1,9 @@
-import { supabase } from '@/lib/supabaseClient'
+import { getSupabaseClient } from '@/lib/supabaseClient'
 import { Todo, CreateTodoInput, UpdateTodoInput } from '@/types'
 
 export const todoAPI = {
   async getTodos(userId: string): Promise<Todo[]> {
+    const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('todos')
       .select('*')
@@ -14,6 +15,7 @@ export const todoAPI = {
   },
 
   async createTodo(userId: string, input: CreateTodoInput): Promise<Todo> {
+    const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('todos')
       .insert({
@@ -29,6 +31,7 @@ export const todoAPI = {
   },
 
   async updateTodo(todoId: string, input: UpdateTodoInput): Promise<Todo> {
+    const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('todos')
       .update(input)
@@ -41,6 +44,7 @@ export const todoAPI = {
   },
 
   async deleteTodo(todoId: string): Promise<void> {
+    const supabase = getSupabaseClient()
     const { error } = await supabase
       .from('todos')
       .delete()
@@ -50,6 +54,7 @@ export const todoAPI = {
   },
 
   async toggleTodo(todoId: string, completed: boolean): Promise<Todo> {
+    const supabase = getSupabaseClient()
     const { data, error } = await supabase
       .from('todos')
       .update({ completed })
