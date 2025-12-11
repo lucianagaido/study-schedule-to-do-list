@@ -1,14 +1,16 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { todoAPI } from '@/lib/todoAPI'
-import { Todo, CreateTodoInput, UpdateTodoInput } from '@/types'
+import { todoAPI, folderAPI } from '@/lib/todoAPI'
+import { Todo, CreateTodoInput, UpdateTodoInput, Folder, CreateFolderInput } from '@/types'
 import { TodoItem } from '@/components/TodoItem'
 import { TodoForm } from '@/components/TodoForm'
 import { Timeline } from '@/components/Timeline'
+import { FolderManager } from '@/components/FolderManager'
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([])
+  const [folders, setFolders] = useState<Folder[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [user, setUser] = useState<any>(null)
@@ -36,6 +38,7 @@ export default function Home() {
         // set a minimal user object for UI purposes
         setUser({ id: guestId, email: 'guest@local' })
         await fetchTodos(guestId as string)
+        await fetchFolders(guestId as string)
       } catch (err) {
         console.error('Boot error:', err)
         setError('Failed to initialise app')
@@ -61,6 +64,15 @@ export default function Home() {
       setError(err.message || 'Failed to load todos')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchFolders = async (userId: string) => {
+    try {
+      const data = await folderAPI.getFolders(userId)
+      setFolders(data)
+    } catch (err: any) {
+      console.error('Error fetching folders:', err)
     }
   }
 
@@ -134,6 +146,44 @@ export default function Home() {
     }
     setUser(null)
     setTodos([])
+    setFolders([])
+  }
+
+  const handleCreateFolder = async (input: CreateFolderInput) => {
+    if (!user) return
+
+    try {
+      const newFolder = await folderAPI.createFolder(user.id, input)
+      setFolders([...folders, newFolder])
+      setError(null)
+    } catch (err: any) {
+      console.error('Error creating folder:', err)
+      setError(err.message || 'Failed to create folder')
+    }
+  }
+
+  const handleUpdateFolder = async (folderId: string, input: Partial<Folder>) => {
+    try {
+      const updated = await folderAPI.updateFolder(folderId, input)
+      setFolders(folders.map((f) => (f.id === updated.id ? updated : f)))
+      setError(null)
+    } catch (err: any) {
+      console.error('Error updating folder:', err)
+      setError(err.message || 'Failed to update folder')
+    }
+  }
+
+  const handleDeleteFolder = async (folderId: string) => {
+    try {
+      await folderAPI.deleteFolder(folderId)
+      setFolders(folders.filter((f) => f.id !== folderId))
+      // Move tasks from deleted folder to no folder
+      setTodos(todos.map((t) => (t.folder_id === folderId ? { ...t, folder_id: undefined } : t)))
+      setError(null)
+    } catch (err: any) {
+      console.error('Error deleting folder:', err)
+      setError(err.message || 'Failed to delete folder')
+    }
   }
 
   if (loading) {
@@ -191,7 +241,16 @@ export default function Home() {
         )}
 
         {/* Timeline */}
-        <Timeline todos={todos} />
+        <Timeline todos={todos} folders={folders} />
+
+        {/* Folder Manager */}
+        <FolderManager
+          folders={folders}
+          onCreateFolder={handleCreateFolder}
+          onUpdateFolder={handleUpdateFolder}
+          onDeleteFolder={handleDeleteFolder}
+          isLoading={formLoading}
+        />
 
         {/* Form */}
         {showForm && (
@@ -204,6 +263,7 @@ export default function Home() {
                 setEditingTodo(null)
               }}
               isLoading={formLoading}
+              folders={folders}
             />
           </div>
         )}

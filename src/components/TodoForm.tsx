@@ -1,13 +1,14 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Todo, CreateTodoInput, UpdateTodoInput } from '@/types'
+import { Todo, CreateTodoInput, UpdateTodoInput, Folder } from '@/types'
 
 interface TodoFormProps {
   initialTodo?: Todo
   onSubmit: (data: CreateTodoInput | UpdateTodoInput) => Promise<void> | void
   onCancel: () => void
   isLoading?: boolean
+  folders?: Folder[]
 }
 
 export const TodoForm: React.FC<TodoFormProps> = ({
@@ -15,11 +16,13 @@ export const TodoForm: React.FC<TodoFormProps> = ({
   onSubmit,
   onCancel,
   isLoading = false,
+  folders = [],
 }) => {
   const [formData, setFormData] = useState({
     title: initialTodo?.title || '',
     description: initialTodo?.description || '',
     due_date: initialTodo?.due_date || '',
+    folder_id: initialTodo?.folder_id || '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,6 +35,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
       title: formData.title,
       description: formData.description || undefined,
       due_date: formData.due_date || undefined,
+      folder_id: formData.folder_id || undefined,
     })
   }
 
@@ -85,6 +89,26 @@ export const TodoForm: React.FC<TodoFormProps> = ({
           }
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+      </div>
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Category (optional)
+        </label>
+        <select
+          value={formData.folder_id}
+          onChange={(e) =>
+            setFormData({ ...formData, folder_id: e.target.value })
+          }
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">No Category</option>
+          {folders.map((folder) => (
+            <option key={folder.id} value={folder.id}>
+              {folder.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="flex gap-3">
