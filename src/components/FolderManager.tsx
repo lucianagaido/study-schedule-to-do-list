@@ -35,6 +35,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   const [formData, setFormData] = useState({ name: '', color: PRESET_COLORS[0] })
   const [editingId, setEditingId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [editingFolder, setEditingFolder] = useState<Folder | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,6 +66,13 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
     } catch (err) {
       console.error('Error deleting folder:', err)
     }
+  }
+
+  const handleQuickEdit = (folder: Folder) => {
+    setEditingFolder(folder)
+    setFormData({ name: folder.name, color: folder.color })
+    setEditingId(folder.id)
+    setShowForm(true)
   }
 
   return (
@@ -161,11 +169,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => {
-                    setEditingId(folder.id)
-                    setFormData({ name: folder.name, color: folder.color })
-                    setShowForm(true)
-                  }}
+                  onClick={() => handleQuickEdit(folder)}
                   className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                 >
                   Edit

@@ -6,6 +6,7 @@ import { Todo, CreateTodoInput, UpdateTodoInput, Folder, CreateFolderInput } fro
 import { TodoItem } from '@/components/TodoItem'
 import { TodoForm } from '@/components/TodoForm'
 import { Timeline } from '@/components/Timeline'
+import { Calendar } from '@/components/Calendar'
 import { FolderManager } from '@/components/FolderManager'
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
   const [showForm, setShowForm] = useState(false)
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
   const [formLoading, setFormLoading] = useState(false)
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null)
 
   useEffect(() => {
     const boot = async () => {
@@ -243,13 +245,16 @@ export default function Home() {
         {/* Timeline */}
         <Timeline todos={todos} folders={folders} />
 
-        {/* Folder Manager */}
-        <FolderManager
+        {/* Calendar */}
+        <Calendar
+          todos={todos}
           folders={folders}
-          onCreateFolder={handleCreateFolder}
-          onUpdateFolder={handleUpdateFolder}
-          onDeleteFolder={handleDeleteFolder}
-          isLoading={formLoading}
+          onEditFolder={(folderId) => {
+            const folder = folders.find((f) => f.id === folderId)
+            if (folder) {
+              setEditingFolderId(folderId)
+            }
+          }}
         />
 
         {/* Form */}
