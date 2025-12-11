@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { getSupabaseClient } from '@/lib/supabaseClient'
 import { todoAPI } from '@/lib/todoAPI'
 import { Todo, CreateTodoInput, UpdateTodoInput } from '@/types'
 import { TodoItem } from '@/components/TodoItem'
@@ -17,54 +16,37 @@ export default function Home() {
   const [formLoading, setFormLoading] = useState(false)
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const boot = async () => {
+      // guest flow: create or get a guest id from localStorage so users can use the app without signing in
       try {
-        let supabase
-        try {
-          supabase = getSupabaseClient()
-        } catch (clientErr: any) {
-          setError('Supabase is not configured. Please check your environment variables.')
-          setLoading(false)
-          return
+        let guestId = null
+        if (typeof window !== 'undefined') {
+          guestId = window.localStorage.getItem('guest_user_id')
+          if (!guestId) {
+            if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+              guestId = crypto.randomUUID()
+            } else {
+              guestId = `guest-${Date.now()}-${Math.floor(Math.random() * 10000)}`
+            }
+            window.localStorage.setItem('guest_user_id', guestId)
+          }
         }
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        setUser(session?.user || null)
 
-        if (session?.user) {
-          await fetchTodos(session.user.id)
-        }
+        // set a minimal user object for UI purposes
+        setUser({ id: guestId, email: 'guest@local' })
+        await fetchTodos(guestId as string)
       } catch (err) {
-        console.error('Auth error:', err)
-        setError('Failed to load user session')
+        console.error('Boot error:', err)
+        setError('Failed to initialise app')
       } finally {
         setLoading(false)
       }
     }
 
-    checkAuth()
+    boot()
 
-    // Listen for auth changes
-    let supabase
-    try {
-      supabase = getSupabaseClient()
-    } catch {
-      return () => {}
-    }
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user || null)
-      if (session?.user) {
-        await fetchTodos(session.user.id)
-      } else {
-        setTodos([])
-      }
-    })
-
-    return () => subscription?.unsubscribe()
+    // no auth listener needed in guest mode
+    return () => {}
   }, [])
 
   const fetchTodos = async (userId: string) => {
@@ -141,14 +123,16 @@ export default function Home() {
   }
 
   const handleSignOut = async () => {
+    // Clear guest session
     try {
-      const supabase = getSupabaseClient()
-      await supabase.auth.signOut()
-      setUser(null)
-      setTodos([])
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('guest_user_id')
+      }
     } catch (err) {
-      console.error('Error signing out:', err)
+      console.error('Error clearing guest id:', err)
     }
+    setUser(null)
+    setTodos([])
   }
 
   if (loading) {
@@ -162,29 +146,7 @@ export default function Home() {
     )
   }
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            📝 Todo List App
-          </h1>
-          <p className="text-gray-600 mb-8">
-            Sign in to manage your tasks and schedule
-          </p>
-          <button
-            onClick={() => {
-              // Redirect to auth page or show auth UI
-              window.location.href = '/auth'
-            }}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            Sign In / Sign Up
-          </button>
-        </div>
-      </div>
-    )
-  }
+  // guest user allowed — no sign-in gate
 
   const completedCount = todos.filter((t) => t.completed).length
   const pendingCount = todos.filter((t) => !t.completed).length
