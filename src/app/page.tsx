@@ -5,6 +5,7 @@ import { todoAPI } from '@/lib/todoAPI'
 import { Todo, CreateTodoInput, UpdateTodoInput } from '@/types'
 import { TodoItem } from '@/components/TodoItem'
 import { TodoForm } from '@/components/TodoForm'
+import { Timeline } from '@/components/Timeline'
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([])
@@ -157,7 +158,7 @@ export default function Home() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">📝 My Todos</h1>
+            <h1 className="text-4xl font-bold text-gray-900">📚 Study To-Do List</h1>
             <p className="text-gray-600 mt-2">
               {user?.email && `Welcome, ${user.email}`}
             </p>
@@ -189,6 +190,9 @@ export default function Home() {
           </div>
         )}
 
+        {/* Timeline */}
+        <Timeline todos={todos} />
+
         {/* Form */}
         {showForm && (
           <div className="mb-8">
@@ -210,7 +214,7 @@ export default function Home() {
             onClick={() => setShowForm(true)}
             className="mb-8 w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
           >
-            + Add New Todo
+            + Add New Task
           </button>
         )}
 

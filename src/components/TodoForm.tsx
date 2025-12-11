@@ -41,7 +41,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
       className="bg-white p-6 rounded-lg shadow-md border border-gray-200"
     >
       <h2 className="text-xl font-bold mb-4">
-        {initialTodo ? 'Edit Todo' : 'New Todo'}
+        {initialTodo ? 'Edit Task' : 'New Task'}
       </h2>
 
       <div className="mb-4">
@@ -75,10 +75,10 @@ export const TodoForm: React.FC<TodoFormProps> = ({
 
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Due Date
+          Due Date & Time (optional)
         </label>
         <input
-          type="date"
+          type="datetime-local"
           value={formData.due_date}
           onChange={(e) =>
             setFormData({ ...formData, due_date: e.target.value })
@@ -93,7 +93,7 @@ export const TodoForm: React.FC<TodoFormProps> = ({
           disabled={isLoading}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
-          {isLoading ? 'Saving...' : initialTodo ? 'Update' : 'Create'}
+          {isLoading ? 'Saving...' : initialTodo ? 'Update' : 'Save'}
         </button>
         <button
           type="button"

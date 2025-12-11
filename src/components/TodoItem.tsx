@@ -40,7 +40,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
           )}
           {todo.due_date && (
             <p className="text-xs text-gray-500 mt-1">
-              Due: {new Date(todo.due_date).toLocaleDateString()}
+              Due: {new Date(todo.due_date).toLocaleString()}
             </p>
           )}
         </div>
